@@ -9,7 +9,7 @@ import vertex from "./shaders/vertex"
 
 const radius = 5
 const precision = 100
-const numberOfRings = 200
+const numberOfRings = 250
 
 const CircleMaterial = shaderMaterial(
   {
@@ -36,7 +36,7 @@ const Sketch = () => {
     }
 
     const curve = new THREE.CatmullRomCurve3(points)
-    const tube = new THREE.TubeBufferGeometry(curve, 100, 0.1, 8, false)
+    const tube = new THREE.TubeBufferGeometry(curve, 100, 0.1, 8, true)
 
     //_ create instanced buffer geometry
     const geometry = new THREE.InstancedBufferGeometry()
@@ -83,11 +83,11 @@ const Sketch = () => {
 
   return (
     <instancedMesh
-      scale={[0.3, 0.3, 0.3]}
+      scale={[0.1, 0.1, 0.1]}
       args={[undefined, undefined, numberOfRings]}
     >
       <primitive object={geometry} attach='geometry' />
-      <circleMaterial ref={ref} transparent={true} />
+      <circleMaterial ref={ref} />
     </instancedMesh>
   )
 }
