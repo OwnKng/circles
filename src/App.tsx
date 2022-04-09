@@ -6,7 +6,7 @@ import Sketch from "./Sketch"
 const App = () => {
   return (
     <div className='App'>
-      <Canvas>
+      <Canvas orthographic camera={{ zoom: 10, position: [0, -100, 50] }}>
         <OrbitControls />
         <Sketch />
       </Canvas>

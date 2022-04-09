@@ -3,7 +3,7 @@ import { shaderMaterial } from "@react-three/drei"
 import { extend, useFrame } from "@react-three/fiber"
 import { useMemo, useRef } from "react"
 import * as THREE from "three"
-import { ShaderMaterial } from "three"
+import { InstancedMesh } from "three"
 import fragment from "./shaders/fragment"
 import vertex from "./shaders/vertex"
 
@@ -22,7 +22,8 @@ const CircleMaterial = shaderMaterial(
 extend({ CircleMaterial })
 
 const Sketch = () => {
-  const ref = useRef<ShaderMaterial>(null!)
+  const ref = useRef<InstancedMesh>(null!)
+  const playerRef = useRef(new THREE.Vector3(0, 0, 0))
 
   const geometry = useMemo(() => {
     const points = []
@@ -47,6 +48,7 @@ const Sketch = () => {
     const translate = new Float32Array(numberOfRings * 3)
     const scale = new Float32Array(numberOfRings)
     const offset = new Float32Array(numberOfRings)
+    const cIndex = new Float32Array(numberOfRings)
 
     for (let i = 0; i < numberOfRings; i++) {
       const x = Math.random()
@@ -60,6 +62,8 @@ const Sketch = () => {
       scale[i] = i * 0.4
 
       offset[i] = Math.random()
+
+      cIndex[i] = i
     }
 
     geometry.setAttribute(
@@ -74,21 +78,40 @@ const Sketch = () => {
       new THREE.InstancedBufferAttribute(offset, 1)
     )
 
+    geometry.setAttribute(
+      "cIndex",
+      new THREE.InstancedBufferAttribute(offset, 1)
+    )
+
     return geometry
   }, [])
 
   useFrame(({ clock }) => {
-    ref.current.uniforms.uTime.value = clock.getElapsedTime()
+    const target = new THREE.Vector3(...playerRef.current)
+    ref.current.position.lerp(target, 0.05)
+
+    ref.current.material.uniforms.uTime.value = clock.getElapsedTime()
   })
 
   return (
-    <instancedMesh
-      scale={[0.1, 0.1, 0.1]}
-      args={[undefined, undefined, numberOfRings]}
-    >
-      <primitive object={geometry} attach='geometry' />
-      <circleMaterial ref={ref} />
-    </instancedMesh>
+    <>
+      <instancedMesh
+        ref={ref}
+        scale={[0.02, 0.02, 0.02]}
+        args={[undefined, undefined, numberOfRings]}
+        position={[0, 0, 0]}
+      >
+        <primitive object={geometry} attach='geometry' />
+        <circleMaterial />
+      </instancedMesh>
+      <mesh
+        rotation={[0, 0, Math.PI * 0.5]}
+        onPointerMove={(e) => (playerRef.current = e.point)}
+      >
+        <planeGeometry args={[1000, 1000, 1, 1]} />
+        <meshBasicMaterial color={new THREE.Color("rgb(255, 255, 0)")} />
+      </mesh>
+    </>
   )
 }
 
