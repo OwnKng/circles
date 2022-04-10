@@ -14,6 +14,7 @@ const numberOfRings = 250
 const CircleMaterial = shaderMaterial(
   {
     uTime: 0,
+    uDistance: 0,
   },
   vertex,
   fragment
@@ -37,7 +38,7 @@ const Sketch = () => {
     }
 
     const curve = new THREE.CatmullRomCurve3(points)
-    const tube = new THREE.TubeBufferGeometry(curve, 100, 0.1, 8, true)
+    const tube = new THREE.TubeBufferGeometry(curve, 200, 0.1, 8, true)
 
     //_ create instanced buffer geometry
     const geometry = new THREE.InstancedBufferGeometry()
@@ -90,6 +91,10 @@ const Sketch = () => {
     const target = new THREE.Vector3(...playerRef.current)
     ref.current.position.lerp(target, 0.05)
 
+    ref.current.material.uniforms.uDistance.value = target.distanceTo(
+      ref.current.position
+    )
+
     ref.current.material.uniforms.uTime.value = clock.getElapsedTime()
   })
 
@@ -97,7 +102,7 @@ const Sketch = () => {
     <>
       <instancedMesh
         ref={ref}
-        scale={[0.02, 0.02, 0.02]}
+        scale={[0.01, 0.01, 0.01]}
         args={[undefined, undefined, numberOfRings]}
         position={[0, 0, 0]}
       >
@@ -107,9 +112,10 @@ const Sketch = () => {
       <mesh
         rotation={[0, 0, Math.PI * 0.5]}
         onPointerMove={(e) => (playerRef.current = e.point)}
+        onPointerDown={(e) => (playerRef.current = e.point)}
       >
         <planeGeometry args={[1000, 1000, 1, 1]} />
-        <meshBasicMaterial color={new THREE.Color("rgb(255, 255, 0)")} />
+        <meshPhongMaterial color='#ff0000' opacity={0} transparent />
       </mesh>
     </>
   )

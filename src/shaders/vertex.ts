@@ -2,6 +2,7 @@ import { noise } from "./nosie"
 
 const vertex = /*glsl*/ `
         uniform float uTime; 
+        uniform float uDistance; 
         attribute vec3 translate;
         attribute float offset; 
         attribute float scale; 
@@ -17,8 +18,8 @@ const vertex = /*glsl*/ `
             noise *= 5.0;
             
             vec3 transformedPosition = position + translate; 
-            transformedPosition += noise; 
-            transformedPosition *= scale; 
+            transformedPosition += noise;  
+            transformedPosition *= scale + uDistance * 0.25;; 
             
             gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(transformedPosition, 1.0);
             vUv = uv; 
